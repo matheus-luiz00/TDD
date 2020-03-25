@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { UserComponent } from './user.component';
 import { UserService } from './user.service';
+import { DataService } from '../core/data.service';
 
 describe('UserComponent', () => {
   describe('Component: User', () => {
@@ -44,6 +45,26 @@ describe('UserComponent', () => {
       let compiled = fixture.debugElement.nativeElement;
       expect(compiled.querySelector('p').textContent).not.toContain(app.user.name); // <p> não deve conter o conteúdo da variável
     })
+
+    it('Não deve pegar o dado do serviço com sucesso', () => {
+     let fixture = TestBed.createComponent(UserComponent);
+     let app = fixture.debugElement.componentInstance;
+     let dataService = fixture.debugElement.injector.get(DataService);
+     let spy = spyOn(dataService, 'GetDetails').and.returnValue(Promise.resolve('Data')); // Escuta alguma chamada no método GetDetals do DataService e retorna um valor mock
+      fixture.detectChanges();
+      expect(app.data).toEqual(undefined); // Como o método do serviço é async, o valor da variável deve ser undefined
+    })
+
+    it('Deve pegar o valor async do serviço com sucesso', async(() => { // com o async o teste faz um mock dos métodos async
+      let fixture = TestBed.createComponent(UserComponent);
+      let app = fixture.debugElement.componentInstance;
+      let dataService = fixture.debugElement.injector.get(DataService);
+      let spy = spyOn(dataService, 'GetDetails').and.returnValue(Promise.resolve('Data')); // Cria o mock do método async
+      fixture.detectChanges();
+      fixture.whenStable().then(() => { // whenStable - diz que quando os métodos async acabarem executara o que estiver dentro de then
+      expect(app.data).toBe('Data');
+      })
+      }))
   });
   
 });
