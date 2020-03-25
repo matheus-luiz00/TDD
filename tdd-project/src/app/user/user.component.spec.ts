@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { UserComponent } from './user.component';
 import { UserService } from './user.service';
@@ -55,7 +55,7 @@ describe('UserComponent', () => {
       expect(app.data).toEqual(undefined); // Como o método do serviço é async, o valor da variável deve ser undefined
     })
 
-    it('Deve pegar o valor async do serviço com sucesso', async(() => { // com o async o teste faz um mock dos métodos async
+    it('Deve pegar o valor async do serviço com sucesso', async(() => { // o async faz o teste gerar um async 'estilo verdadeiro'
       let fixture = TestBed.createComponent(UserComponent);
       let app = fixture.debugElement.componentInstance;
       let dataService = fixture.debugElement.injector.get(DataService);
@@ -64,6 +64,16 @@ describe('UserComponent', () => {
       fixture.whenStable().then(() => { // whenStable - diz que quando os métodos async acabarem executara o que estiver dentro de then
       expect(app.data).toBe('Data');
       })
+      }))
+
+      it('Deve pegar o valor async do serviço com sucesso com o fakeAsync e tick', fakeAsync(() => { // o fakeAsync é uma outra forma de fazer o falso async, mas você pode dizer quando os metodos mockados retornarão o valor
+        let fixture = TestBed.createComponent(UserComponent);
+        let app = fixture.debugElement.componentInstance;
+        let dataService = fixture.debugElement.injector.get(DataService);
+        let spy = spyOn(dataService, 'GetDetails').and.returnValue(Promise.resolve('Data')); 
+        fixture.detectChanges();
+        tick(); // faz os métodos async mockados pararem e retornarem o valor
+        expect(app.data).toBe('Data');
       }))
   });
   
